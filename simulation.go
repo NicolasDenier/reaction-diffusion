@@ -144,11 +144,17 @@ func main() {
 	raster.Resize(fyne.NewSize(width, height))
 	// launch animation
 	go animate(raster)
-	// listen for button press
+
+	// listen for key press
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
-		if k.Name == "S" {
+		switch k.Name {
+		// screenshot
+		case "S":
 			fmt.Println("Image saved")
 			saveImage(w)
+		// close
+		case "C":
+			w.Close()
 		}
 	})
 	w.ShowAndRun()
