@@ -20,7 +20,7 @@ type Config struct {
 }
 
 type compute interface {
-	init()
+	InitState()
 	Update()
 }
 
@@ -37,15 +37,25 @@ func randInt(min, max int) int {
 	return r.Intn(max-min) + min
 }
 
-func (c Config) init() {
+func Clamp(n float64, min, max float64) float64 {
+	// restrict a value between two bounds
+	if n < min {
+		return min
+	} else if n > max {
+		return max
+	}
+	return n
+}
+
+func (c Config) InitState() {
 	// define the initial state of B
 	// for now, random rectangles
 	h, w := c.B.Dims()
 	// random number of rectagles
-	for k := 0; k < randInt(1, 6); k++ {
+	for k := 0; k < randInt(1, 10); k++ {
 		// random widths
-		w1 := randInt(5, 30)
-		w2 := randInt(5, 30)
+		w1 := randInt(5, 50)
+		w2 := randInt(5, 50)
 		// center of rectangle position
 		x := randInt(w1, w-w1)
 		y := randInt(w2, h-w2)
@@ -58,21 +68,27 @@ func (c Config) init() {
 	}
 }
 
-func NewConfig(h, w int, DA, DB, f, k, dt float64) Config {
-	// create a new config
+func NewEmptyConfig(h, w int) Config {
+	// create a new config without the numerical variables
 	ones := fill(h*w, 1)
 	zeros := fill(h*w, 0)
 	setup := Config{
-		DA:     DA,
-		DB:     DB,
-		F:      f,
-		K:      k,
-		Dt:     dt,
 		A:      mat.NewDense(h, w, ones),
 		B:      mat.NewDense(h, w, zeros),
 		Kernel: mat.NewDense(3, 3, []float64{0.05, 0.2, 0.05, 0.2, -1, 0.2, 0.05, 0.2, 0.05}),
 	}
-	setup.init()
+	setup.InitState()
+	return setup
+}
+
+func NewConfig(h, w int, DA, DB, f, k, dt float64) Config {
+	// create a new config with all variables initialized
+	setup := NewEmptyConfig(h, w)
+	setup.DA = DA
+	setup.DB = DB
+	setup.F = f
+	setup.K = k
+	setup.Dt = dt
 	return setup
 }
 
